@@ -1,0 +1,12 @@
+# /usr/share/doc/rhel-system-roles
+---
+- hosts: node1
+  vars:
+    storage_volumes:
+      - name: my_vol
+        type: disk
+        disks:
+          - nvme0n1p2  # physical device
+        fs_type: ext4  # default is xfs
+  roles:
+    - rhel-system-roles.storage

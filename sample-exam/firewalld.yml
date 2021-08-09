@@ -1,0 +1,30 @@
+---
+- hosts: all
+  become: yes
+  tasks: 
+  - yum: 
+      name: firewalld, python-firewall
+      state: installed
+  # another alternative to yum:
+  # - name: install firewalld
+  #     action: yum name=firewalld state=installed  # action instead yum
+  - service: 
+      name: firewalld
+      enabled: yes
+      state: started
+
+# verify: sudo systemctl status firewalld
+
+#alternative: 
+---
+- hosts: all
+  user: ansible
+  become: yes
+  gather_facts: no
+  tasks:
+    - name: Enable firewalld on system reboot
+      service: name=firewalld enabled=yes
+    - name: Start service firewalld, if not started
+      service:
+        name: firewalld
+        state: started

@@ -1,0 +1,44 @@
+---
+- hosts: localhost
+  connection: local
+  tasks:
+    - debug: msg="This is my env PATH = {{lookup('env', 'PATH') }}"
+    - debug: msg="Search in google = {{lookup('url', 'https://google.com') }}"
+    - debug: msg="File contents = {{lookup('file', 'file.txt') }}"
+    - debug: msg="User1's password is {{ lookup('ini', 'user1 section=users file=file.ini') }}"  # sections are required in the ini file, otherwise use java properties format
+    - debug: msg="Random password = {{ lookup('password', '/tmp/passwordfile chars=ascii_letters,digits,hexdigits,punctuation') }}"
+    - debug: msg="Selected a random location from us-east-a,b,c = {{ item }}"
+      with_random_choice:
+        - us-east-a
+        - us-east-b
+        - us-east-c
+    - debug: msg="the VM number {{ item.0 }} has a {{ item.1 }} OS"
+      with_indexed_items:
+        - Windows 2019
+        - RedHat 7
+        - Amazon Linux
+    - shell: "groups {{ item }}"
+      with_lines:
+        - "/usr/bin/users"
+    - debug: msg="System partitions = {{ lookup('pipe', 'df -hk') }}"
+    - debug: msg="{{item}}"
+      with_fileglob: /home/ansible/*.yml
+
+    - name: read vars from first file found, use 'vars/' relative subdir
+      include_vars: "{{lookup('first_found', params)}}"
+      vars:
+        params:
+          files:
+            - '{{ansible_os_distribution}}.yml'
+            - '{{ansible_os_family}}.yml'
+            - default.yml
+          paths:
+            - 'vars'
+            
+    - debug: msg="{{lookup('sequence', 'start=2 end=22 stride=3')}}"
+    - name: alternate way to find some 'prefixed vars' in loop
+      debug: msg="{{ lookup('vars', 'ansible_play_' + item) }}"
+      loop:
+        - hosts
+        - batch
+        - hosts_all
